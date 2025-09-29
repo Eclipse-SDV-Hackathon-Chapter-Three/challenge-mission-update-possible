@@ -146,6 +146,11 @@ Replace `<workload_name>` with the workload name for which you want to see the l
 
 Proceed to the next steps to enhance this basic scenario with your custom update workflow.
 
+## ⚠️ Docker Desktop Users
+When running Docker inside Docker Desktop with WSL2, the host network mode does not behave the same way as on native Linux. Containers attached with `network_mode: host` are isolated within Docker Desktop’s internal VM and are not directly reachable from your Windows or WSL environment.
+
+To avoid connectivity issues, use the provided `docker-compose.yaml` and `state.yaml` files in the `docker-desktop folder`. These variants remove the host network settings and publish ports explicitly, ensuring your services are accessible from both Docker Desktop and other runtimes.
+
 ## Additional Ankaios commands
 
 ```
