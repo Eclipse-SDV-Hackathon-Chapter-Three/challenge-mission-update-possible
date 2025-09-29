@@ -28,7 +28,9 @@ services:
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: mosquitto
-    network_mode: host
+    ports:
+      - "1883:1883"     # MQTT (TCP)
+      # - "9001:9001"   # (optional) WebSocket listener, enable in config first
     volumes:
       - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - mosquitto-data:/mosquitto/data

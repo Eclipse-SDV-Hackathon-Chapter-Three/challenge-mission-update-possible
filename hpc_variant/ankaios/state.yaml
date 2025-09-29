@@ -32,7 +32,7 @@ workloads:
         data: "{{symphony_config}}"
     runtimeConfig: |
       image: ghcr.io/eclipse-symphony/symphony-api:0.48-proxy.41
-      commandOptions: ["-e","CONFIG=/symphony-agent.json", "--net=host"]
+      commandOptions: ["-e","CONFIG=/symphony-agent.json"]
   Ankaios_Dashboard:
     runtime: podman
     agent: agent_A
