@@ -17,7 +17,7 @@ services:
     container_name: symphony-portal
     network_mode: host
     environment:
-      - SYMPHONY_API=http://symphony-api:8082/v1alpha2/
+      - SYMPHONY_API=http://localhost:8082/v1alpha2/
       - NEXTAUTH_SECRET=SymphonyKey
       - NEXTAUTH_URL=http://localhost:3000
     restart: unless-stopped
