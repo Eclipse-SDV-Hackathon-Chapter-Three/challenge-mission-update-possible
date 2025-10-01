@@ -78,6 +78,43 @@ To enable `ank-cli` shell completion (for auto-completing workload names and fie
 
 No installation is required; the cloud component is launched via Docker Compose.
 
+### Docker Desktop for MacOS and Windows users
+
+First you need to upgrade to newer Docker Desktop versions so that "host networks" are supported.
+
+Enable the option `Settings->Resources->Networking->Enable Host Networking`.
+
+You can run the challenge without a Linux VM by just using the prebuilt Ankaios app devcontainer that includes Ankaios installation and Podman inside a container.
+
+Lunch everything with Docker Desktop.
+
+Start the cloud part like described below in [Start the cloud part](#start-the-cloud-part).
+
+Start the Ankaios app devcontainer v0.6.0 with the following command and mount the whole challenge repository into the container:
+
+```shell
+docker run --privileged --network host -it -v ./:/workspace --workdir /workspace  ghcr.io/eclipse-ankaios/app-ankaios-dev:0.6.0
+```
+
+Now, you work with Ankaios in the container (container in container) but still can modify the files using your preferered local editor.
+
+Move on with [Start the in-vehicle part](#start-the-in-vehicle-part), but do not try to start Ankaios with systemd since it is not part of the Ankaios app container. Instead, start manually ank `ank-server` and an `ank-agent` with name `agent_A` and apply the [state.yaml](./ankaios/state.yaml):
+
+```shell
+ank-server > /dev/null 2>&1 &
+ank-agent --name agent_A > /dev/null 2>&1 &
+```
+
+You are using Ankaios and podman rootless now, so if you build a container image inside the Ankaios app container, then you have to use `podman build` instead of `sudo podman build`.
+
+After applying the `state.yaml` all services are visible on the localhost, which you can optionally check with:
+
+```shell
+sudo lsof -iTCP -sTCP:LISTEN -P -n
+```
+
+Feel free to make Visual Studio Devcontainer out of it if you want better development experience.
+
 ## Run the demo
 
 ### Start the cloud part
