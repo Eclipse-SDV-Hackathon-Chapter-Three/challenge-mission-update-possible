@@ -32,7 +32,7 @@ workloads:
         data: "{{symphony_config}}"
     runtimeConfig: |
       image: ghcr.io/eclipse-symphony/symphony-api:0.48-proxy.41
-      commandOptions: ["-e","CONFIG=/symphony-agent.json", "--net=host"]
+      commandOptions: ["-e", "LOG_LEVEL=Info", "-e","CONFIG=/symphony-agent.json", "-e", "RUST_LOG=INFO,uprotocol=INFO", "--net=host", "-v", "hackathon-extensions:/hackathon-extensions"]
   Ankaios_Dashboard:
     runtime: podman
     agent: agent_A
@@ -96,7 +96,7 @@ configs:
                   "providers.secret": "mock-secret",
                   "providers.keylock": "mem-keylock",
                   "isTarget": "true",
-                  "targetNames": "ankaios-target",
+                  "targetNames": "ankaios-target,ecu-updater-target",
                   "poll.enabled": "true"
                 },
                 "providers": {
@@ -124,6 +124,17 @@ configs:
                       "name": "ankaios-type",
                       "libFile": "/extensions/libankaios.so",
                       "libHash": "23b67af66adc4830547528da66bb307c72bccef9db5de386b33cf3e1dc9ea483"
+                    }
+                  },
+                  "ecu-updater":{
+                    "type": "providers.target.rust",
+                    "config": {
+                      "name": "ecu-updater-type",
+                      "libFile": "/hackathon-extensions/libuprotocol.so",
+                      "libHash": "any",
+                      "localEntity": "up://symphony/DA00/1/0",
+                      "getMethodUri": "up://ecu-updater.app/A100/1/1",
+                      "brokerAddress": "mqtt://host.containers.internal:1883"
                     }
                   }
                 }
