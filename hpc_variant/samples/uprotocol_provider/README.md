@@ -2,7 +2,10 @@
 
 * [Rust toolchain installed](https://rustup.rs/) on your local machine
 * Podman installed as described in the [Ankaios README](../../README.md)
-* [ECU Updater example application](https://github.com/eclipse-uprotocol/symphony-target-example-rust) running on your machine
+* [ECU Updater example application](https://github.com/eclipse-uprotocol/symphony-target-example-rust) running on your machine with a minimum log level of `info`:
+  ```bash
+  RUST_LOG=info ./target/debug/ecu-updater mqtt5
+  ```
 
 ## Steps
 
