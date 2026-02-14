@@ -1,0 +1,146 @@
+apiVersion: v0.1
+workloads:
+  update_trigger:
+    runtime: podman
+    agent: agent_A
+    controlInterfaceAccess:
+      allowRules:
+        - type: StateRule
+          operation: ReadWrite
+          filterMask:
+            - "*"
+    runtimeConfig: |
+      image: ghcr.io/eclipse-sdv-hackathon-chapter-three/mission-update/update_trigger:latest
+      commandOptions: ["-p","5500:5500"]
+  symphony:
+    runtime: podman
+    agent: "" 
+    restartPolicy: NEVER    
+    tags:
+      - key: owner
+        value: Symphony
+    configs:
+      symphony_config: symphony_config
+    controlInterfaceAccess:
+      allowRules:
+        - type: StateRule
+          operation: ReadWrite
+          filterMask:
+            - "*"
+    files:
+      - mountPoint: "/symphony-agent.json"
+        data: "{{symphony_config}}"
+    runtimeConfig: |
+      image: ghcr.io/eclipse-symphony/symphony-api:0.48-proxy.41
+      commandOptions: ["-e","CONFIG=/symphony-agent.json"]
+  Ankaios_Dashboard:
+    runtime: podman
+    agent: agent_A
+    restartPolicy: NEVER 
+    runtimeConfig: |
+       image: ghcr.io/eclipse-ankaios-dashboard/ankaios-dashboard:v0.6.0
+       commandOptions: ["-p", "5001:5001"]
+    controlInterfaceAccess:
+        allowRules:
+          - type: StateRule
+            operation: ReadWrite
+            filterMask:
+              - "*"
+configs:
+  symphony_config: |
+    {
+      "siteInfo": {
+        "siteId": "my-agent",
+        "currentSite": {
+          "baseUrl": "",
+          "username": "",
+          "password": ""
+        }
+      },
+      "api": {
+        "pubsub": {
+          "shared": true,
+          "provider": {
+            "type": "providers.pubsub.memory",
+            "config": {}
+          }
+        },
+        "keylock": {
+          "shared": true,
+          "provider": {      
+            "type": "providers.keylock.memory",
+            "config": {
+              "mode": "Global",
+              "cleanInterval" : 30,
+              "purgeDuration" : 43200
+            }
+          }
+        },
+        "vendors": [
+          {
+            "type": "vendors.echo",
+            "route": "greetings",
+            "managers": []
+          },
+          {
+            "type": "vendors.solution",
+            "loopInterval": 15,
+            "route": "solution",
+            "managers": [
+              {
+                "name": "solution-manager",
+                "type": "managers.symphony.solution",
+                "properties": {
+                  "providers.persistentstate": "mem-state",                
+                  "providers.config": "mock-config",  
+                  "providers.secret": "mock-secret",
+                  "providers.keylock": "mem-keylock",
+                  "isTarget": "true",
+                  "targetNames": "ankaios-target",
+                  "poll.enabled": "true"              
+                },
+                "providers": {
+                  "mem-state": {
+                    "type": "providers.state.memory",
+                    "config": {}
+                  },     
+                  "mem-keylock": {
+                    "type": "providers.keylock.memory",
+                    "config": {
+                      "mode" : "Shared"
+                    }
+                  },         
+                  "mock-config": {
+                    "type": "providers.config.mock",
+                    "config": {}
+                  },
+                  "mock-secret": {
+                    "type": "providers.secret.mock",
+                    "config": {}
+                  },
+                  "ankaios":{
+                    "type": "providers.target.rust",
+                    "config": {
+                      "name": "ankaios-type",
+                      "libFile": "/extensions/libankaios.so",
+                      "libHash": "23b67af66adc4830547528da66bb307c72bccef9db5de386b33cf3e1dc9ea483"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "bindings": [
+        {
+          "type": "bindings.mqtt",
+          "config": {
+            "brokerAddress": "tcp://host.containers.internal:1883",
+            "clientID": "my-agent",
+            "requestTopic": "coa-request",
+            "responseTopic": "coa-response"
+          }
+        }
+      ]
+    }
